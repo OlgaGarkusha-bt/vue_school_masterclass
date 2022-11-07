@@ -7,7 +7,8 @@ export default {
   },
   getters: {},
   actions: {
-    async createPost ({ commit, /*state,*/ rootState }, post) {
+    async createPost ({ commit, state, rootState }, post) {
+      console.log(state);
       post.userId = rootState.auth.authId
       post.publishedAt = firebase.firestore.FieldValue.serverTimestamp()
       const batch = firebase.firestore().batch()
@@ -28,12 +29,13 @@ export default {
       commit('threads/appendPostToThread', { childId: newPost.id, parentId: post.threadId }, { root: true }) // append post to thread
       commit('threads/appendContributorToThread', { childId: rootState.auth.authId, parentId: post.threadId }, { root: true })
     },
-    async updatePost ({ commit/*, state*/, rootState }, { text, id }) {
+
+    async updatePost ({ commit, /*state,*/ rootState }, { text, id }) {
       const post = {
         text,
         edited: {
           at: firebase.firestore.FieldValue.serverTimestamp(),
-          by: rootState.authId,
+          by: rootState.auth.authId,
           moderated: false
         }
       }

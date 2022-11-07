@@ -115,6 +115,7 @@ const router = createRouter(
     }
   }
 )
+
 router.beforeEach(async (to, from) => {
   await store.dispatch('auth/initAuthentication')
   console.log(`🚦 navigating to ${to.name} from ${from.name}`)

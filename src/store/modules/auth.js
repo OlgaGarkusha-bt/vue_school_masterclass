@@ -13,14 +13,14 @@ export default {
     }
   },
   actions: {
-    initAuthentication ({ /*dispatch,*/ commit, state }) {
+    initAuthentication ({ dispatch, commit, state }) {
       if (state.authObserverUnsubscribe) state.authObserverUnsubscribe()
       return new Promise((resolve) => {
         const unsubscribe = firebase.auth().onAuthStateChanged(async (user) => {
           console.log('👣 the user has changed')
-          this.dispatch('auth/unsubscribeAuthUserSnapshot')
+          dispatch('unsubscribeAuthUserSnapshot')
           if (user) {
-            await this.dispatch('auth/fetchAuthUser')
+            await dispatch('fetchAuthUser')
             resolve(user)
           } else {
             resolve(null)
