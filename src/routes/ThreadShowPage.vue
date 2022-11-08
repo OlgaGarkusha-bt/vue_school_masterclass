@@ -35,6 +35,8 @@
   import PostEditor from '@/components/PostEditor.vue'
   import { mapActions, mapGetters } from 'vuex'
   import asynDataStatus from '@/mixins/asyncDataStatus'
+  import useNotifications from '@/composables/useNotifications'
+  import difference from 'lodash/difference'
 
   export default {
     name: 'ThreadShow',
@@ -49,6 +51,10 @@
         required: true,
         type: String
       }
+    },
+    setup () {
+      const { addNotification } = useNotifications()
+      return { addNotification }
     },
     computed: {
       ...mapGetters('auth', ['authUser']),
@@ -70,6 +76,14 @@
       ...mapActions('threads', ['fetchThread']),
       ...mapActions('users', ['fetchUsers']),
       ...mapActions('posts', ['fetchPosts', 'createPost']),
+
+      async fetchPostsWithUsers (ids) {
+        // fetch the posts
+        const posts = await this.fetchPosts({ ids })
+        // fetch the users associated with the posts
+        const users = posts.map(post => post.userId).concat(this.thread.userId)
+        await this.fetchUsers({ ids: users })
+      },
       
       addPost (eventData) {
         const post = {
@@ -81,14 +95,16 @@
     },
     async created () {
       // fetch the thread
-      const thread = await this.fetchThread({ id: this.id })
-
-      // fetch the posts
-      const posts = await this.fetchPosts({ ids: thread.posts })
-
-      // fetch the users associated with the posts
-      const users = posts.map(post => post.userId).concat(thread.userId)
-      await this.fetchUsers({ ids: users })
+      const thread = await this.fetchThread({
+        id: this.id,
+        onSnapshot: async ({ isLocal, item, previousItem }) => {
+          if (!this.asyncDataStatus_ready || isLocal) return
+          const newPosts = difference(item.posts, previousItem.posts)
+          await this.fetchPostsWithUsers(newPosts)
+          this.addNotification({ message: 'Thread recently updated' })
+        }
+      })
+      await this.fetchPostsWithUsers(thread.posts)
       this.asyncDataStatus_fetched()
     }
   }
