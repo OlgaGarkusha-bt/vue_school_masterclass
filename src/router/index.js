@@ -119,11 +119,12 @@ router.beforeEach(async (to, from) => {
   console.log(`🚦 navigating to ${to.name} from ${from.name}`)
   store.dispatch('unsubscribeAllSnapshots')
   if (to.meta.requiresAuth && !store.state.auth.authId) {
-    return { name: 'SignIn', query: { redirectTo: to.path }}
+    return { name: 'SignIn', query: { redirectTo: to.path } }
   }
-  if (to.meta.requiresGuest && store.state.auth.authId) {
+  /*if (to.meta.requiresGuest && store.state.auth.authId) {
+    console.log('I am redirected');
     return { name: 'Home' }
-  }
+  }*/
 })
 
 export default router
