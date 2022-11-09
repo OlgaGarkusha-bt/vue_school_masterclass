@@ -1831,9 +1831,7 @@ button {
 
 .avatar-small {
     width: 35px;
-    max-width: 35px;
     height: 35px;
-    max-height: 35px;
 }
 
 .avatar-medium {
@@ -1852,9 +1850,10 @@ button {
 
 .avatar-xlarge {
     width: 200px;
-    max-width: 200px;
-    height: 200px;
-    max-height: 200px;
+    height: 200px;  
+}
+img {
+    width: 100%;
 }
 
 .card {

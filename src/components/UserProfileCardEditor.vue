@@ -1,12 +1,21 @@
 <template>
   <div class="profile-card">
     <form @submit.prevent="save">
-      <p class="text-center">
-        <img
-          :src="user.avatar"
-          :alt="`${user.name} profile picture`"
-          class="avatar-xlarge img-update"
-        />
+      <p class="text-center  avatar-edit">
+        <label for="avatar">
+          <img
+            :src="activeUser.avatar"
+            :alt="`${user.name} profile picture`"
+            class="avatar-xlarge img-update"
+          />
+
+          <div class="avatar-upload-overlay">
+            <AppSpinner v-if="uploadingImage" color="white" />
+            <f-a v-else icon="camera" size="3x" :style="{color: 'white', opacity: '.8'}" />
+          </div>
+
+          <input v-show="false" type="file" id="avatar" accept="image/*" @change="handleAvatarUpload">
+        </label>
       </p>
 
       <div class="form-group">
@@ -75,7 +84,7 @@
       </div>
 
       <div class="btn-group space-between">
-        <button class="btn-ghost" @click="cancel">Cancel</button>
+        <button class="btn-ghost" @click.prevent="cancel">Cancel</button>
         <button type="submit" class="btn-blue">Save</button>
       </div>
     </form>
@@ -83,6 +92,8 @@
 </template>
 
 <script>
+  import { mapActions } from 'vuex'
+
   export default {
     props: {
       user: {
@@ -92,10 +103,19 @@
     },
     data () {
       return {
+        uploadingImage: false,
         activeUser: { ...this.user } //cloning the user property to avoid copying by reference
       }
     },
     methods: {
+      ...mapActions('auth', ['uploadAvatar']),
+
+      async handleAvatarUpload (e) {
+        this.uploadingImage = true
+        const file = e.target.files[0]
+        this.activeUser.avatar = await this.uploadAvatar({ file })
+        this.uploadingImage = false
+      },
       save () {
         this.$store.dispatch('users/updateUser', { ...this.activeUser })
         this.$router.push({ name: 'Profile' })
@@ -106,3 +126,19 @@
     }
   }
 </script>
+
+<style scoped>
+  .img-update:hover,
+  .fa-camera:hover {
+    cursor: pointer;
+  }
+  .avatar-edit{
+    position:relative;
+  }
+  .avatar-edit .avatar-upload-overlay{
+    position:absolute;
+    top:50%;
+    left:50%;
+    transform: translate(-50%, -50%);
+  }
+</style>
